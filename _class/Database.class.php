@@ -50,6 +50,90 @@
                 return false;
             }
         }
+        
+        public function Update($Table,$Params = array(), $Where = NULL){
+            foreach($Params as $Key => $Value){
+                $CamposFields[] = "{$Key} = '{$Value}'";
+            }
+            $Campos = implode(', ',$CamposFields);
+            $SQL = "UPDATE {$Table} SET {$Campos} {$Where}";
+            $this->MyQuery = $SQL;
+            if($this->MyConn->query($SQL)){
+                array_push($this->Result, $this->MyConn->affected_rows);
+                return true;
+            }else{
+                array_push($this->Result, $this->MyConn->error);
+                return false;
+            }
+        }
+
+        public function Delete($Table,$Where = NULL){
+            if($Where == NULL){
+                $SQL = "TRUNCATE {$Table}";
+            }else{
+                $SQL = "DELETE FROM {$Table} {$Where}";
+                
+            }
+            $this->MyQuery = $SQL;
+            if($this->MyConn->query($SQL)){
+                array_push($this->Result, $this->MyConn->affected_rows);
+                return true;
+            }else{
+                array_push($this->Result, $this->MyConn->error);
+                return false;
+            }
+        }
+
+        public function SQL($SQL){
+            $Query = $this->MyConn->query($SQL);
+            $this->MyQuery = $SQL;
+            if($Query){
+                $this->NumResult = $Query->num_rows;
+                for($i=0;$i<$this->NumResult;$i++){
+                    $R = $Query->fetch_array();
+                    $Key = array_keys($R);
+                    for($x=0;$x<count($Key);$x++){
+                        if(!is_int($Key[$x])){
+                            if($Query->num_rows >= 1){
+                                $this->Result[$i][$Key[$x]] = $R[$Key[$x]];
+                            }else{
+                                $this->Result = null;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }else{
+                array_push($this->Result, $this->MyConn->error);
+                return false;
+            }
+        }
+
+        public function Read($Table, $Where = NULL){
+            $SQL = "SELECT * FROM {$Table} {$Where}";
+            $Query = $this->MyConn->query($SQL);
+            $this->MyQuery = $SQL;
+            if($Query){
+                $this->NumResult = $Query->num_rows;
+                for($i=0;$i<$this->NumResult;$i++){
+                    $R = $Query->fetch_array();
+                    $Key = array_keys($R);
+                    for($x=0;$x<count($Key);$x++){
+                        if(!is_int($Key[$x])){
+                            if($Query->num_rows >= 1){
+                                $this->Result[$i][$Key[$x]] = $R[$Key[$x]];
+                            }else{
+                                $this->Result = null;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }else{
+                array_push($this->Result, $this->MyConn->error);
+                return false;
+            }
+        }
 
         public function GetResult(){
             $Val = $this->Result;
